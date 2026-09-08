@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: vault
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: HOST
+        value: "0.0.0.0"
+      - key: NODE_VERSION
+        value: "24"
