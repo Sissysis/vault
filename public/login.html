@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in &middot; Vault</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="galaxy"></div>
+  <div class="vignette"></div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="logo">Vault</div>
+        <p>Secure focus. Your space.</p>
+      </div>
+
+      <div class="auth-title">Log in to your vault</div>
+
+      <div class="form-error" id="errorBox"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            class="input"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            class="input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Log in</button>
+      </form>
+
+      <div class="auth-switch">
+        New to Vault? <a href="register.html">Create an account</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById("loginForm");
+      const errorBox = document.getElementById("errorBox");
+      const submitBtn = document.getElementById("submitBtn");
+
+      const flash = (msg, inputs) => {
+        errorBox.textContent = msg;
+        errorBox.classList.add("show");
+        (inputs || []).forEach((el) => {
+          if (el) el.classList.add("has-error");
+        });
+      };
+
+      const clearErrors = () => {
+        errorBox.classList.remove("show");
+        document.querySelectorAll(".has-error").forEach((el) => el.classList.remove("has-error"));
+      };
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+          flash("Please fill in all fields.");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Opening vault...";
+
+        try {
+          const res = await API.request("/api/login", {
+            method: "POST",
+            body: JSON.stringify({ username, password }),
+          });
+          if (res.status === 200) {
+            window.location.href = "/";
+          } else {
+            const data = res.data;
+            flash(data.error || "Login failed.", [
+              document.getElementById("username"),
+              document.getElementById("password"),
+            ]);
+          }
+        } catch (err) {
+          flash("Network error. Please try again.");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Log in";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

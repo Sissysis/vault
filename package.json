@@ -1,0 +1,11 @@
+{
+  "name": "vault",
+  "version": "1.0.0",
+  "description": "Personal vault - auth + notes + pomodoro clock",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT"
+}

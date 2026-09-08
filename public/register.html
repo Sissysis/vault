@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register &middot; Vault</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="galaxy"></div>
+  <div class="vignette"></div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="logo">Vault</div>
+        <p>Create your private workspace.</p>
+      </div>
+
+      <div class="auth-title">Create your account</div>
+
+      <div class="form-error" id="errorBox"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            class="input"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="3-24 characters"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            class="input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="At least 6 characters"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input
+            class="input"
+            type="password"
+            id="confirm"
+            name="confirm"
+            placeholder="Re-enter your password"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Create account</button>
+      </form>
+
+      <div class="auth-switch">
+        Already have an account? <a href="login.html">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById("registerForm");
+      const errorBox = document.getElementById("errorBox");
+      const submitBtn = document.getElementById("submitBtn");
+
+      const flash = (msg, inputs) => {
+        errorBox.textContent = msg;
+        errorBox.classList.add("show");
+        (inputs || []).forEach((el) => {
+          if (el) el.classList.add("has-error");
+        });
+      };
+
+      const clearErrors = () => {
+        errorBox.classList.remove("show");
+        document.querySelectorAll(".has-error").forEach((el) => el.classList.remove("has-error"));
+      };
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirm").value;
+
+        if (!username || !password || !confirm) {
+          flash("Please fill in all fields.");
+          return;
+        }
+        if (password !== confirm) {
+          flash("Passwords do not match.", [
+            document.getElementById("password"),
+            document.getElementById("confirm"),
+          ]);
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Creating...";
+
+        try {
+          const res = await API.request("/api/register", {
+            method: "POST",
+            body: JSON.stringify({ username, password }),
+          });
+          if (res.status === 201) {
+            window.location.href = "/";
+          } else {
+            const data = res.data;
+            flash(data.error || "Registration failed.", [
+              document.getElementById("username"),
+            ]);
+          }
+        } catch (err) {
+          flash("Network error. Please try again.");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Create account";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
